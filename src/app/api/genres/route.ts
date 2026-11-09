@@ -1,15 +1,11 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { createGenre, listGenresWithCounts } from "@/lib/firestore";
 import { requireAdmin } from "@/lib/require-admin";
 import { genreSchema } from "@/lib/schemas";
 import { isUniqueConstraintError } from "@/lib/loan-service";
 
 export async function GET() {
-  const genres = await prisma.genre.findMany({
-    include: { _count: { select: { books: true } } },
-    orderBy: { name: "asc" },
-  });
-  return NextResponse.json(genres);
+  return NextResponse.json(await listGenresWithCounts());
 }
 
 export async function POST(request: Request) {
@@ -20,7 +16,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid genre data." }, { status: 400 });
   }
   try {
-    const genre = await prisma.genre.create({ data: parsed.data });
+    const genre = await createGenre(parsed.data);
     return NextResponse.json(genre, { status: 201 });
   } catch (error) {
     if (isUniqueConstraintError(error)) {

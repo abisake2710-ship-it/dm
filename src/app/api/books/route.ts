@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildCatalogResult, CatalogBook } from "@/lib/catalog";
-import { prisma } from "@/lib/prisma";
+import {
+  createBook,
+  getGenresByIds,
+  listBooks,
+  listGenres,
+} from "@/lib/firestore";
 import { requireAdmin } from "@/lib/require-admin";
 import { bookSchema } from "@/lib/schemas";
 import { isUniqueConstraintError } from "@/lib/loan-service";
@@ -24,13 +29,7 @@ export async function GET(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid catalog query." }, { status: 400 });
   }
-  const [records, genreRecords] = await Promise.all([
-    prisma.book.findMany({
-      include: { genres: { include: { genre: true } } },
-      orderBy: { title: "asc" },
-    }),
-    prisma.genre.findMany({ select: { name: true } }),
-  ]);
+  const [records, genreRecords] = await Promise.all([listBooks(), listGenres()]);
   const books: CatalogBook[] = records.map((book) => ({
     id: book.id,
     title: book.title,
@@ -39,7 +38,7 @@ export async function GET(request: Request) {
     description: book.description,
     coverColor: book.coverColor,
     available: book.available,
-    genres: book.genres.map(({ genre }) => genre.name),
+    genres: book.genres,
   }));
   const selectedGenres = parsed.data.genres;
   const knownGenres = new Set(genreRecords.map(({ name }) => name));
@@ -54,12 +53,7 @@ export async function GET(request: Request) {
   });
   if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
   const matchingIds = new Set(result.books.map((book) => book.id));
-  return NextResponse.json(
-    records.filter((book) => matchingIds.has(book.id)).map((book) => ({
-      ...book,
-      genres: book.genres.map(({ genre }) => genre.name),
-    })),
-  );
+  return NextResponse.json(records.filter((book) => matchingIds.has(book.id)));
 }
 
 export async function POST(request: Request) {
@@ -71,24 +65,10 @@ export async function POST(request: Request) {
   }
   try {
     const data = parsed.data;
-    const book = await prisma.$transaction(async (transaction) => {
-      const genres = await transaction.genre.findMany({ where: { id: { in: data.genreIds } } });
-      if (genres.length !== new Set(data.genreIds).size) throw new Error("One or more selected genres do not exist.");
-      return transaction.book.create({
-        data: {
-          title: data.title,
-          author: data.author,
-          isbn: data.isbn || null,
-          publicationYear: data.publicationYear ?? null,
-          description: data.description || null,
-          coverColor: data.coverColor || null,
-          genres: { create: genres.map((genre) => ({ genre: { connect: { id: genre.id } } })) },
-        },
-        include: { genres: { include: { genre: true } } },
-      });
-    });
+    const book = await createBook(data);
+    const genres = await getGenresByIds(book.genreIds);
     return NextResponse.json(
-      { ...book, genres: book.genres.map(({ genre }) => genre.name) },
+      { ...book, genres: genres.map(({ name }) => name) },
       { status: 201 },
     );
   } catch (error) {

@@ -1,29 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { getBookDetails, getRelatedBooks } from "@/lib/firestore";
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function BookDetailPage({ params }: Props) {
   const { id } = await params;
-  const book = await prisma.book.findUnique({
-    where: { id },
-    include: {
-      genres: { include: { genre: true } },
-      loans: { include: { member: true }, orderBy: { loanedAt: "desc" } },
-    },
-  });
+  const book = await getBookDetails(id);
   if (!book) notFound();
 
-  const related = await prisma.book.findMany({
-    where: {
-      id: { not: id },
-      genres: { some: { genreId: { in: book.genres.map(({ genreId }) => genreId) } } },
-    },
-    include: { genres: { include: { genre: true } } },
-    take: 4,
-    orderBy: { title: "asc" },
-  });
+  const related = await getRelatedBooks(book);
   const activeLoan = book.loans.find((loan) => loan.returnedAt === null);
 
   return (
@@ -123,7 +109,7 @@ export default async function BookDetailPage({ params }: Props) {
             <section className="loan-info">
               <h2>Active Circulation Record</h2>
               <p>
-                Borrowed by member <strong>{activeLoan.member.name}</strong>
+                Borrowed by member <strong>{activeLoan.member?.name ?? "Unknown member"}</strong>
               </p>
               <p>
                 Due back on <strong>{activeLoan.dueAt.toLocaleDateString("en-US", { dateStyle: "long" })}</strong>

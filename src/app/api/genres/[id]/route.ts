@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { deleteGenre, updateGenre } from "@/lib/firestore";
 import { requireAdmin } from "@/lib/require-admin";
 import { genreSchema } from "@/lib/schemas";
 import { isUniqueConstraintError } from "@/lib/loan-service";
@@ -15,12 +15,12 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
   const { id } = await context.params;
   try {
-    return NextResponse.json(await prisma.genre.update({ where: { id }, data: parsed.data }));
+    return NextResponse.json(await updateGenre(id, parsed.data));
   } catch (error) {
     if (isUniqueConstraintError(error)) {
       return NextResponse.json({ error: "That genre already exists." }, { status: 409 });
     }
-    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
+    if (error instanceof Error && error.message === "Genre not found.") {
       return NextResponse.json({ error: "Genre not found." }, { status: 404 });
     }
     console.error("Could not update genre:", error);
@@ -33,10 +33,10 @@ export async function DELETE(request: Request, context: RouteContext) {
   if (unauthorized) return unauthorized;
   const { id } = await context.params;
   try {
-    await prisma.genre.delete({ where: { id } });
+    await deleteGenre(id);
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
+    if (error instanceof Error && error.message === "Genre not found.") {
       return NextResponse.json({ error: "Genre not found." }, { status: 404 });
     }
     console.error("Could not delete genre:", error);

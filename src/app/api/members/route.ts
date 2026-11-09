@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { createMember, listMembers } from "@/lib/firestore";
 import { requireAdmin } from "@/lib/require-admin";
 import { memberSchema } from "@/lib/schemas";
 import { isUniqueConstraintError } from "@/lib/loan-service";
@@ -7,7 +7,7 @@ import { isUniqueConstraintError } from "@/lib/loan-service";
 export async function GET(request: Request) {
   const unauthorized = await requireAdmin(request);
   if (unauthorized) return unauthorized;
-  return NextResponse.json(await prisma.member.findMany({ orderBy: { name: "asc" } }));
+  return NextResponse.json(await listMembers());
 }
 
 export async function POST(request: Request) {
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid member data." }, { status: 400 });
   }
   try {
-    return NextResponse.json(await prisma.member.create({ data: parsed.data }), { status: 201 });
+    return NextResponse.json(await createMember(parsed.data), { status: 201 });
   } catch (error) {
     if (isUniqueConstraintError(error)) {
       return NextResponse.json({ error: "A member with that email already exists." }, { status: 409 });

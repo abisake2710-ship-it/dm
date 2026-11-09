@@ -1,18 +1,12 @@
 import { CatalogExplorer } from "@/components/catalog-explorer";
 import { CatalogBook } from "@/lib/catalog";
-import { prisma } from "@/lib/prisma";
+import { listBooks, listGenres } from "@/lib/firestore";
 
 export const dynamic = "force-dynamic";
 
 async function loadCatalog() {
   try {
-    const [records, genreRecords] = await Promise.all([
-      prisma.book.findMany({
-        include: { genres: { include: { genre: true } } },
-        orderBy: { title: "asc" },
-      }),
-      prisma.genre.findMany({ orderBy: { name: "asc" }, select: { name: true } }),
-    ]);
+    const [records, genreRecords] = await Promise.all([listBooks(), listGenres()]);
     return {
       books: records.map((book): CatalogBook => ({
         id: book.id,
@@ -22,7 +16,7 @@ async function loadCatalog() {
         description: book.description,
         coverColor: book.coverColor,
         available: book.available,
-        genres: book.genres.map(({ genre }) => genre.name),
+        genres: book.genres,
       })),
       genres: genreRecords.map(({ name }) => name),
     };
@@ -39,8 +33,8 @@ export default async function HomePage() {
       <main className="setup-error">
         <p className="eyebrow">SETLIB · LOCAL CATALOG</p>
         <h1>Your library is almost ready.</h1>
-        <p>Set up the local database and seed the catalog, then refresh this page.</p>
-        <pre>Copy .env.example to .env, then run npm run db:setup</pre>
+        <p>Configure Firebase App Hosting and seed the Firestore catalog, then refresh this page.</p>
+        <pre>See the Firebase setup steps in README.md.</pre>
         <p className="setup-hint">Database errors are logged in the development server for troubleshooting.</p>
       </main>
     );

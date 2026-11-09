@@ -4,10 +4,10 @@ SetLib is a responsive library catalog that makes set theory visible in everyday
 
 ## Requirements
 
-- Node.js 20.9 or later
+- Node.js 24.12 or later
 - npm
 
-## Local setup
+## Firebase setup
 
 1. Install dependencies:
 
@@ -15,19 +15,36 @@ SetLib is a responsive library catalog that makes set theory visible in everyday
    npm install
    ```
 
-2. Copy `.env.example` to `.env`. Set a private `ADMIN_PASSWORD` for your local librarian account. Keep `.env` out of source control.
+2. Copy `.env.example` to `.env`. Set a private `ADMIN_PASSWORD` and the Firebase project values. Keep `.env` out of source control.
 
-3. Set the `NEXT_PUBLIC_FIREBASE_*` values in `.env` to your Firebase project's web app configuration before importing the Firebase client from `src/lib/firebase.ts`. These values are included in browser code and are not secrets. The catalog and its APIs continue to use Prisma and SQLite.
+3. In the Firebase console, enable Firestore and App Hosting for project `nirbhaya-9e457`, and upgrade the project to the Blaze plan. The App Hosting runtime service account needs the **Cloud Datastore User** role to access Firestore through the Admin SDK.
 
-4. Create the SQLite database, apply the Prisma migration, and seed the catalog:
+4. Sign in with Google Cloud Application Default Credentials for local Firestore access:
+
+   ```sh
+   gcloud auth application-default login
+   ```
+
+5. To copy the existing local SQLite catalog to an empty Firestore database, create and seed the local source database, then run the one-time migration:
 
    ```sh
    npm run db:setup
+   npm run db:migrate:firestore
    ```
 
-   The seed command is deterministic and resets the local catalog to exactly 25 books, 11 genres, 6 members, and 16 loans (10 active and 6 returned). Use it only when you want to restore the sample data.
+   The migration preserves book, genre, member, loan, and availability data. It refuses to overwrite a Firestore database that already contains records.
 
-5. Start the development server:
+6. Create the `admin-password` secret for App Hosting and deploy:
+
+   ```sh
+   firebase apphosting:secrets:set admin-password --force
+   firebase init apphosting
+   firebase deploy --only apphosting:setlib
+   ```
+
+   When prompted, use project `nirbhaya-9e457`, select or create the `setlib` backend, choose a region, and select Node.js 24. Enter a strong librarian password when creating the secret. App Hosting requires the Blaze plan. Firebase CLI local-source deployment requires version 14.4.0 or later.
+
+7. Start the app locally:
 
    ```sh
    npm run dev
@@ -35,7 +52,7 @@ SetLib is a responsive library catalog that makes set theory visible in everyday
 
    Open [http://localhost:3000](http://localhost:3000). The librarian desk is at `/admin`.
 
-The SQLite file is created under `prisma/dev.db`. For manual database commands, use `npm run db:migrate -- --name <migration-name>`, `npm run db:generate`, and `npm run db:seed`.
+Firestore client rules deny direct browser access. The server uses the Firebase Admin SDK, which authenticates using Application Default Credentials locally and the App Hosting runtime service account in production. The SQLite database is retained as a local source for the one-time Firestore migration.
 
 ## Available scripts
 
@@ -46,9 +63,10 @@ The SQLite file is created under `prisma/dev.db`. For manual database commands, 
 | `npm start` | Start the production server |
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run the TypeScript compiler |
-| `npm test` | Run unit and database integration tests |
+| `npm test` | Run unit tests and Firestore-emulator integration tests when configured |
 | `npm run test:e2e` | Run Playwright end-to-end tests |
-| `npm run db:setup` | Apply migrations and reset/seed the sample data |
+| `npm run db:setup` | Create and seed the local SQLite catalog for migration |
+| `npm run db:migrate:firestore` | Copy the local SQLite catalog to an empty Firestore database |
 
 Run `npx playwright install chromium` once before the browser tests if Playwright's Chromium browser is not installed.
 

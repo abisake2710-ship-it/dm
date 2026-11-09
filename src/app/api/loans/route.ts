@@ -1,17 +1,13 @@
 import { NextResponse } from "next/server";
 import { createLoan } from "@/lib/loan-service";
-import { prisma } from "@/lib/prisma";
+import { listLoans } from "@/lib/firestore";
 import { requireAdmin } from "@/lib/require-admin";
 import { loanSchema } from "@/lib/schemas";
 
 export async function GET(request: Request) {
   const unauthorized = await requireAdmin(request);
   if (unauthorized) return unauthorized;
-  const loans = await prisma.loan.findMany({
-    include: { book: true, member: true },
-    orderBy: { loanedAt: "desc" },
-  });
-  return NextResponse.json(loans);
+  return NextResponse.json(await listLoans());
 }
 
 export async function POST(request: Request) {
