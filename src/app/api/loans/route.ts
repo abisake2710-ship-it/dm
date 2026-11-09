@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createLoan } from "@/lib/loan-service";
-import { listLoans } from "@/lib/realtime-database";
+import { listLoans } from "@/lib/data";
 import { requireAdmin } from "@/lib/require-admin";
 import { loanSchema } from "@/lib/schemas";
 

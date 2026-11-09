@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { deleteGenre, updateGenre } from "@/lib/realtime-database";
+import { deleteGenre, updateGenre } from "@/lib/data";
 import { requireAdmin } from "@/lib/require-admin";
 import { genreSchema } from "@/lib/schemas";
 import { isUniqueConstraintError } from "@/lib/loan-service";

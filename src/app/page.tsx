@@ -1,6 +1,6 @@
 import { CatalogExplorer } from "@/components/catalog-explorer";
 import { CatalogBook } from "@/lib/catalog";
-import { listBooks, listGenres } from "@/lib/realtime-database";
+import { listBooks, listGenres } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 

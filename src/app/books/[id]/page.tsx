@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBookDetails, getRelatedBooks } from "@/lib/realtime-database";
+import { getBookDetails, getRelatedBooks } from "@/lib/data";
 
 type Props = { params: Promise<{ id: string }> };
 

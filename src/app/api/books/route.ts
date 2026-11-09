@@ -6,7 +6,7 @@ import {
   getGenresByIds,
   listBooks,
   listGenres,
-} from "@/lib/realtime-database";
+} from "@/lib/data";
 import { requireAdmin } from "@/lib/require-admin";
 import { bookSchema } from "@/lib/schemas";
 import { isUniqueConstraintError } from "@/lib/loan-service";

@@ -20,13 +20,13 @@ SetLib is a responsive library catalog that makes set theory visible in everyday
 
 3. In the Firebase console, create or enable a Realtime Database and App Hosting for project `nirbhaya-9e457`, and upgrade the project to the Blaze plan. The App Hosting runtime service account needs the **Firebase Realtime Database Admin** role.
 
-4. Sign in with Google Cloud Application Default Credentials for local database access:
+4. For local development, the app uses the seeded SQLite database when Google Cloud credentials are not configured. To exercise Realtime Database locally, sign in with Google Cloud Application Default Credentials:
 
    ```sh
    gcloud auth application-default login
    ```
 
-5. To copy the existing local SQLite catalog to an empty Realtime Database, create and seed the local source database, then run the one-time migration:
+5. To copy the existing local SQLite catalog to an empty Realtime Database, create and seed the local source database, authenticate with Google Cloud CLI as in step 4, then run the one-time migration:
 
    ```sh
    npm run db:setup
@@ -52,7 +52,7 @@ SetLib is a responsive library catalog that makes set theory visible in everyday
    npm run dev
    ```
 
-   Open [http://localhost:3000](http://localhost:3000). The librarian desk is at `/admin`.
+   Open [http://localhost:3000](http://localhost:3000). Without local Google credentials, this uses SQLite; App Hosting uses Realtime Database. The librarian desk is at `/admin`.
 
 Realtime Database rules deny direct browser access. The server uses the Firebase Admin SDK, which authenticates using Application Default Credentials locally and the App Hosting runtime service account in production. The SQLite database is retained as a local source for the one-time Realtime Database migration.
 
@@ -65,7 +65,7 @@ Realtime Database rules deny direct browser access. The server uses the Firebase
 | `npm start` | Start the production server |
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run the TypeScript compiler |
-| `npm test` | Run unit tests and Realtime Database emulator tests when configured |
+| `npm test` | Run unit tests and SQLite-backed loan integration tests |
 | `npm run test:e2e` | Run Playwright end-to-end tests |
 | `npm run db:setup` | Create and seed the local SQLite catalog for migration |
 | `npm run db:migrate:rtdb` | Copy the local SQLite catalog to Realtime Database |
