@@ -5,7 +5,7 @@ import {
   getGenresByIds,
   getRelatedBooks,
   updateBook,
-} from "@/lib/firestore";
+} from "@/lib/realtime-database";
 import { requireAdmin } from "@/lib/require-admin";
 import { bookSchema } from "@/lib/schemas";
 import { isUniqueConstraintError } from "@/lib/loan-service";

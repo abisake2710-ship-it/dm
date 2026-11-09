@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createGenre, listGenresWithCounts } from "@/lib/firestore";
+import { createGenre, listGenresWithCounts } from "@/lib/realtime-database";
 import { requireAdmin } from "@/lib/require-admin";
 import { genreSchema } from "@/lib/schemas";
 import { isUniqueConstraintError } from "@/lib/loan-service";

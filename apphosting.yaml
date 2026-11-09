@@ -4,6 +4,11 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: FIREBASE_DATABASE_URL
+    value: https://nirbhaya-9e457-default-rtdb.firebaseio.com
+    availability:
+      - BUILD
+      - RUNTIME
   - variable: ADMIN_PASSWORD
     secret: admin-password
     availability:

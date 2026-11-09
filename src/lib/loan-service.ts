@@ -2,7 +2,7 @@ import {
   createMemberLoan,
   DuplicateValueError,
   returnMemberLoan,
-} from "@/lib/firestore";
+} from "@/lib/realtime-database";
 
 export const createLoan = createMemberLoan;
 export const returnLoan = returnMemberLoan;

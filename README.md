@@ -6,6 +6,7 @@ SetLib is a responsive library catalog that makes set theory visible in everyday
 
 - Node.js 24.12 or later
 - npm
+- Google Cloud CLI for local development against a secured database
 
 ## Firebase setup
 
@@ -15,30 +16,31 @@ SetLib is a responsive library catalog that makes set theory visible in everyday
    npm install
    ```
 
-2. Copy `.env.example` to `.env`. Set a private `ADMIN_PASSWORD` and the Firebase project values. Keep `.env` out of source control.
+2. Copy `.env.example` to `.env`. Set a private `ADMIN_PASSWORD` and `FIREBASE_DATABASE_URL` to the URL shown in Realtime Database settings. Keep `.env` out of source control.
 
-3. In the Firebase console, enable Firestore and App Hosting for project `nirbhaya-9e457`, and upgrade the project to the Blaze plan. The App Hosting runtime service account needs the **Cloud Datastore User** role to access Firestore through the Admin SDK.
+3. In the Firebase console, create or enable a Realtime Database and App Hosting for project `nirbhaya-9e457`, and upgrade the project to the Blaze plan. The App Hosting runtime service account needs the **Firebase Realtime Database Admin** role.
 
-4. Sign in with Google Cloud Application Default Credentials for local Firestore access:
+4. Sign in with Google Cloud Application Default Credentials for local database access:
 
    ```sh
    gcloud auth application-default login
    ```
 
-5. To copy the existing local SQLite catalog to an empty Firestore database, create and seed the local source database, then run the one-time migration:
+5. To copy the existing local SQLite catalog to an empty Realtime Database, create and seed the local source database, then run the one-time migration:
 
    ```sh
    npm run db:setup
-   npm run db:migrate:firestore
+   npm run db:migrate:rtdb
    ```
 
-   The migration preserves book, genre, member, loan, and availability data. It refuses to overwrite a Firestore database that already contains records.
+   The migration preserves book, genre, member, loan, and availability data. It refuses to overwrite Realtime Database data at those paths.
 
 6. Create the `admin-password` secret for App Hosting and deploy:
 
    ```sh
    firebase apphosting:secrets:set admin-password --force
    firebase init apphosting
+   firebase deploy --only database
    firebase deploy --only apphosting:setlib
    ```
 
@@ -52,7 +54,7 @@ SetLib is a responsive library catalog that makes set theory visible in everyday
 
    Open [http://localhost:3000](http://localhost:3000). The librarian desk is at `/admin`.
 
-Firestore client rules deny direct browser access. The server uses the Firebase Admin SDK, which authenticates using Application Default Credentials locally and the App Hosting runtime service account in production. The SQLite database is retained as a local source for the one-time Firestore migration.
+Realtime Database rules deny direct browser access. The server uses the Firebase Admin SDK, which authenticates using Application Default Credentials locally and the App Hosting runtime service account in production. The SQLite database is retained as a local source for the one-time Realtime Database migration.
 
 ## Available scripts
 
@@ -63,10 +65,10 @@ Firestore client rules deny direct browser access. The server uses the Firebase 
 | `npm start` | Start the production server |
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run the TypeScript compiler |
-| `npm test` | Run unit tests and Firestore-emulator integration tests when configured |
+| `npm test` | Run unit tests and Realtime Database emulator tests when configured |
 | `npm run test:e2e` | Run Playwright end-to-end tests |
 | `npm run db:setup` | Create and seed the local SQLite catalog for migration |
-| `npm run db:migrate:firestore` | Copy the local SQLite catalog to an empty Firestore database |
+| `npm run db:migrate:rtdb` | Copy the local SQLite catalog to Realtime Database |
 
 Run `npx playwright install chromium` once before the browser tests if Playwright's Chromium browser is not installed.
 

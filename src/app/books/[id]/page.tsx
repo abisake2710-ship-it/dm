@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBookDetails, getRelatedBooks } from "@/lib/firestore";
+import { getBookDetails, getRelatedBooks } from "@/lib/realtime-database";
 
 type Props = { params: Promise<{ id: string }> };
 

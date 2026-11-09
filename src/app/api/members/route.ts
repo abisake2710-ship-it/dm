@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createMember, listMembers } from "@/lib/firestore";
+import { createMember, listMembers } from "@/lib/realtime-database";
 import { requireAdmin } from "@/lib/require-admin";
 import { memberSchema } from "@/lib/schemas";
 import { isUniqueConstraintError } from "@/lib/loan-service";

@@ -18,7 +18,7 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:setup": "prisma generate && prisma migrate deploy && npm run db:seed",
-    "db:migrate:firestore": "tsx scripts/migrate-sqlite-to-firestore.ts"
+    "db:migrate:rtdb": "tsx scripts/migrate-sqlite-to-realtime-database.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
