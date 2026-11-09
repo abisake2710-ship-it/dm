@@ -4,36 +4,6 @@ env:
     availability:
       - BUILD
       - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    value: AIzaSyAp45rnI33FghCFn8V7yzz_JqO999_CLDw
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-    value: nirbhaya-9e457.firebaseapp.com
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    value: nirbhaya-9e457
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-    value: nirbhaya-9e457.firebasestorage.app
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-    value: "1065818962370"
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
-    value: 1:1065818962370:web:7e4a3054c41d93cd927e5b
-    availability:
-      - BUILD
-      - RUNTIME
   - variable: ADMIN_PASSWORD
     secret: admin-password
     availability:
