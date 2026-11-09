@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Book {
+  id              String      @id @default(uuid())
+  title           String
+  author          String
+  isbn            String?     @unique
+  publicationYear Int?
+  description     String?
+  coverColor      String?
+  available       Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  genres          BookGenre[]
+  loans           Loan[]
+
+  @@index([title])
+  @@index([author])
+}
+
+model Genre {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  description String?
+  books       BookGenre[]
+}
+
+model BookGenre {
+  bookId  String
+  genreId String
+  book    Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, genreId])
+}
+
+model Member {
+  id      String   @id @default(uuid())
+  name    String
+  email   String   @unique
+  joinedAt DateTime @default(now())
+  loans   Loan[]
+}
+
+model Loan {
+  id         String    @id @default(uuid())
+  bookId     String
+  memberId   String
+  loanedAt   DateTime  @default(now())
+  dueAt      DateTime
+  returnedAt DateTime?
+  book       Book      @relation(fields: [bookId], references: [id], onDelete: Restrict)
+  member     Member    @relation(fields: [memberId], references: [id], onDelete: Restrict)
+
+  @@index([bookId, returnedAt])
+  @@index([memberId])
+}
