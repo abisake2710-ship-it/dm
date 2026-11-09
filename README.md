@@ -17,7 +17,9 @@ SetLib is a responsive library catalog that makes set theory visible in everyday
 
 2. Copy `.env.example` to `.env`. Set a private `ADMIN_PASSWORD` for your local librarian account. Keep `.env` out of source control.
 
-3. Create the SQLite database, apply the Prisma migration, and seed the catalog:
+3. Set the `NEXT_PUBLIC_FIREBASE_*` values in `.env` to your Firebase project's web app configuration before importing the Firebase client from `src/lib/firebase.ts`. These values are included in browser code and are not secrets. The catalog and its APIs continue to use Prisma and SQLite.
+
+4. Create the SQLite database, apply the Prisma migration, and seed the catalog:
 
    ```sh
    npm run db:setup
@@ -25,7 +27,7 @@ SetLib is a responsive library catalog that makes set theory visible in everyday
 
    The seed command is deterministic and resets the local catalog to exactly 25 books, 11 genres, 6 members, and 16 loans (10 active and 6 returned). Use it only when you want to restore the sample data.
 
-4. Start the development server:
+5. Start the development server:
 
    ```sh
    npm run dev
